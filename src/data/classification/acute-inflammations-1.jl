@@ -8,14 +8,15 @@ register(DataDep(
   post_fetch_method=(path -> begin
     # First 2 bytes are garbage
     data = LegacyStrings.utf16(read(path)[3:end])
-    data = replace(data, "," => ".")
+    data = replace(data, ",", ".")  # TODO remove at CSV.read
     write(path, data)
 
     UCIData.process_dataset(path,
         target_index=7,
         feature_indices=1:6,
         categoric_indices=2:6,
-        delim='\t',
+        separator=' ',
+        # decimal=',',
     )
   end),
 ))

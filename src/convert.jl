@@ -14,14 +14,24 @@ function process_dataset(
     categoric_indices=1:0,
     kwargs...
   )
-  df = CSV.File(
+
+  df = readtable(
       path,
       header=false,
-      missingstrings=["", "NA", "?", "*", "#DIV/0!"],
+      nastrings=["", "NA", "?", "*", "#DIV/0!"],
       truestrings=["T", "t", "TRUE", "true", "y", "yes"],
       falsestrings=["F", "f", "FALSE", "false", "n", "no"];
       kwargs...
-  ) |> DataFrame
+  )
+  # df = CSV.read(
+  #     path,
+  #     header=false,
+  #     delim=separator,
+  #     missingstrings=["", "NA", "?", "*", "#DIV/0!"],
+  #     truestrings=["T", "t", "TRUE", "true", "y", "yes"],
+  #     falsestrings=["F", "f", "FALSE", "false", "n", "no"],
+  #     skipto=header_lines
+  # )
 
   output_names = Symbol[]
   output_df = DataFrame()
@@ -31,19 +41,22 @@ function process_dataset(
 
   # Construct output values
   categoric_indices_set = Set(categoric_indices)
+  index = 2
   for i in feature_indices
     if i in categoric_indices_set
       push!(output_names, :C)
+      # push!(output_names, Symbol("C$(length(output_names) - 1)"))
     else
       push!(output_names, :N)
+      # push!(output_names, Symbol("N$(length(output_names) - 1)"))
     end
-    output_df[size(output_df, 2) + 1] = df[i]
   end
-  names!(output_df, output_names, makeunique=true)
 
-  output_df[:target] = df[target_index]
+  push!(output_names, :target)
+
+  output_df = [output_df df[collect(feature_indices)] df[target_index]]
+  names!(output_df, output_names, allow_duplicates=true)
 
   output_path = joinpath(dirname(path), "data.csv")
-
-  CSV.write(output_path, output_df, delim=',', writeheader=true)
+  writetable(output_path, output_df, separator=',', header=true)
 end

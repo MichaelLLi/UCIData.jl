@@ -1,7 +1,9 @@
 environment:
   matrix:
+  - julia_version: 0.6
   - julia_version: 0.7
-  - julia_version: 1.0
+  DATADEPS_ALWAY_ACCEPT: true
+  DATADEPS_ALWAYS_ACCEPT: true
 
 platform:
   - x86 # 32-bit

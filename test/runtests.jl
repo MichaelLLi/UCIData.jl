@@ -1,8 +1,5 @@
 using UCIData
-using Test
-
-
-ENV["DATADEPS_ALWAYS_ACCEPT"] = true
+using Base.Test
 
 expected_sizes = Dict(
     "classification" => Dict(
@@ -156,7 +153,7 @@ expected_sizes = Dict(
   @testset "$dataset" for dataset in UCIData.list_datasets(datasettype)
     df = UCIData.dataset(dataset)
     n_categoric = sum(map(x -> string(x)[1] == 'C', names(df)))
-    n_missing = sum(count(ismissing, df[c]) for c in names(df))
+    n_missing = sum(count(DataFrames.isna, df[c]) for c in names(df))
     @test (size(df, 1), size(df, 2), n_categoric, n_missing) ==
           expected_sizes[datasettype][dataset]
   end
